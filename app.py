@@ -14,7 +14,7 @@ st.set_page_config(
 # We use @st.cache_resource so it only loads once (faster)
 @st.cache_resource
 def load_model():
-   model = tf.keras.models.load_model('ecolens_model.h5', compile=False)
+    model = tf.keras.models.load_model('ecolens_model.h5', compile=False)
     return model
 
 with st.spinner('Loading AI Brain...'):
@@ -98,3 +98,4 @@ if uploaded_file:
 
 
     st.warning("📢 **Log:** Item recorded in ESG Carbon Database.")
+
