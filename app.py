@@ -13,7 +13,7 @@ st.set_page_config(
 # --- LOAD MODEL FUNCTION ---
 @st.cache_resource
 def load_model():
-    # We use compile=False to avoid searching for the optimizer state
+    # 'compile=False' fixes the "optimizer" errors from version mismatch
     model = tf.keras.models.load_model('ecolens_model.h5', compile=False)
     return model
 
@@ -26,7 +26,7 @@ try:
     with st.spinner('Loading AI Model...'):
         model = load_model()
 except Exception as e:
-    st.error(f"Error loading model: {e}")
+    st.error(f"❌ Error loading model: {e}")
     st.stop()
 
 # --- CLASS LABELS ---
