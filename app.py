@@ -14,7 +14,7 @@ st.set_page_config(
 @st.cache_resource
 def load_model():
     # Load the NEW .keras file
-    model = tf.keras.models.load_model('ecolens_model.keras')
+    model = tf.keras.models.load_model('fixed_ecolens.keras')
     return model
 
 # --- UI HEADER ---
@@ -80,3 +80,4 @@ if uploaded_file:
             st.write("💰 Moderate ($110/ton)")
         else:
             st.write("📉 Cost (Tipping Fees)")
+
