@@ -3,99 +3,83 @@ import tensorflow as tf
 from PIL import Image, ImageOps
 import numpy as np
 
-# --- PAGE CONFIGURATION ---
+# --- PAGE CONFIG ---
 st.set_page_config(
     page_title="EcoLens: AI Waste Audit",
     page_icon="♻️",
     layout="centered"
 )
 
-# --- LOAD THE MODEL ---
-# We use @st.cache_resource so it only loads once (faster)
+# --- LOAD MODEL FUNCTION ---
 @st.cache_resource
 def load_model():
+    # We use compile=False to avoid searching for the optimizer state
     model = tf.keras.models.load_model('ecolens_model.h5', compile=False)
     return model
 
-with st.spinner('Loading AI Brain...'):
-    model = load_model()
-
-# --- CLASS LABELS (Must match your training order) ---
-class_names = ['Cardboard', 'Glass', 'Metal', 'Paper', 'Plastic', 'Trash']
-
 # --- UI HEADER ---
-st.title("♻️ EcoLens: Intelligent Waste Sorting")
-st.markdown("### AI-Powered Circular Economy Tool")
-st.write("Upload waste items to automate sorting and audit sustainability metrics.")
+st.title("♻️ EcoLens: Smart Waste Intelligence")
+st.markdown("### AI-Powered Sustainability Audit Tool")
+
+# --- LOAD THE BRAIN ---
+try:
+    with st.spinner('Loading AI Model...'):
+        model = load_model()
+except Exception as e:
+    st.error(f"Error loading model: {e}")
+    st.stop()
+
+# --- CLASS LABELS ---
+class_names = ['Cardboard', 'Glass', 'Metal', 'Paper', 'Plastic', 'Trash']
 
 # --- FILE UPLOAD ---
 uploaded_file = st.file_uploader("Drop Waste Image Here...", type=["jpg", "png", "jpeg"])
 
 if uploaded_file:
-    # 1. Display User Image
+    # 1. Display Image
     image = Image.open(uploaded_file)
     st.image(image, caption="Uploaded Specimen", width=300)
 
-    # 2. Preprocess Image (The "Magic" Step)
-    # Resize to 224x224 because MobileNetV2 expects this exact size
+    # 2. Preprocess
+    # Resize to 224x224 (Model Requirement)
     image_resized = ImageOps.fit(image, (224, 224), Image.Resampling.LANCZOS)
     
-    # Convert to numbers and normalize (0-1)
+    # Normalize
     img_array = np.array(image_resized) / 255.0
-    img_array = np.expand_dims(img_array, axis=0) # Add batch dimension
-    
+    img_array = np.expand_dims(img_array, axis=0)
+
     # 3. Predict
     prediction = model.predict(img_array)
-    idx = np.argmax(prediction) # Get the index of the highest score
+    idx = np.argmax(prediction)
     label = class_names[idx]
     confidence = np.max(prediction) * 100
 
-    # --- RESULTS DISPLAY ---
+    # 4. Show Results
     st.divider()
+    st.header(f"Detected: {label}")
+    st.progress(int(confidence))
+    st.caption(f"AI Confidence: {confidence:.1f}%")
+
+    # 5. Business Logic
+    st.subheader("📋 Sustainability Audit")
+    c1, c2 = st.columns(2)
     
-    # The Big Result
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        st.subheader(f"Detected: **{label}**")
-        st.progress(int(confidence))
-        st.caption(f"AI Confidence: {confidence:.1f}%")
-    
-    # --- BUSINESS LOGIC (The "Management" Value) ---
-    st.markdown("---")
-    st.subheader("📋 Sustainability Audit Report")
+    with c1:
+        st.info("**Operational Action**")
+        if label in ['Cardboard', 'Paper']:
+            st.write("Route: **Pulping Mill**")
+        elif label in ['Glass', 'Metal', 'Plastic']:
+            st.write("Route: **MRF (Recycling Center)**")
+        else:
+            st.write("Route: **Incineration**")
 
-    c1, c2, c3 = st.columns(3)
-
-    if label in ['Cardboard', 'Paper']:
-        with c1:
-            st.success("✅ **Action**")
-            st.write("Recycle (Fiber)")
-        with c2:
-            st.info("🏭 **Destination**")
-            st.write("Pulping Mill")
-        with c3:
-            st.metric("Economic Value", "$110 / ton", delta="High Demand")
-            
-    elif label in ['Glass', 'Metal', 'Plastic']:
-        with c1:
-            st.success("✅ **Action**")
-            st.write("Recycle (Solid)")
-        with c2:
-            st.info("🏭 **Destination**")
-            st.write("Material Recovery Facility")
-        with c3:
-            st.metric("Economic Value", "$400 - $1500", delta="Variable")
-            
-    else: # Trash
-        with c1:
-            st.error("⚠️ **Action**")
-            st.write("Disposal")
-        with c2:
-            st.warning("🏭 **Destination**")
-            st.write("Landfill / Incinerator")
-        with c3:
-            st.metric("Cost Impact", "-$85 / ton", delta="-Tipping Fees", delta_color="inverse")
-
-
-    st.warning("📢 **Log:** Item recorded in ESG Carbon Database.")
-
+    with c2:
+        st.success("**Economic Value**")
+        if label == 'Metal':
+            st.write("💰 High ($1500/ton)")
+        elif label == 'Plastic':
+            st.write("💰 Moderate ($400/ton)")
+        elif label == 'Cardboard':
+            st.write("💰 Moderate ($110/ton)")
+        else:
+            st.write("📉 Cost (Tipping Fees)")
