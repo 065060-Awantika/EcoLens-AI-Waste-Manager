@@ -30,14 +30,3 @@ This project serves as a proof-of-concept for **Smart City Infrastructure** and 
 4.  **Paper** (Mixed Fiber)
 5.  **Plastic** (Petroleum-based Polymer)
 6.  **Trash** (Landfill/Incineration)
-
----
-
-## 🛠️ Installation & Usage
-
-To run this project locally, follow these steps:
-
-### 1. Clone the Repository
-```bash
-git clone [https://github.com/YOUR_USERNAME/EcoLens-Sustainability-Audit.git](https://github.com/YOUR_USERNAME/EcoLens-Sustainability-Audit.git)
-cd EcoLens-Sustainability-Audit
