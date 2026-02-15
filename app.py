@@ -10,23 +10,23 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- LOAD MODEL FUNCTION ---
+# --- LOAD MODEL ---
 @st.cache_resource
 def load_model():
-    # 'compile=False' fixes the "optimizer" errors from version mismatch
-    model = tf.keras.models.load_model('ecolens_model.h5', compile=False)
+    # Load the NEW .keras file
+    model = tf.keras.models.load_model('ecolens_model.keras')
     return model
 
 # --- UI HEADER ---
 st.title("♻️ EcoLens: Smart Waste Intelligence")
 st.markdown("### AI-Powered Sustainability Audit Tool")
 
-# --- LOAD THE BRAIN ---
+# --- LOAD BRAIN ---
 try:
     with st.spinner('Loading AI Model...'):
         model = load_model()
 except Exception as e:
-    st.error(f"❌ Error loading model: {e}")
+    st.error(f"❌ Model Loading Error: {e}")
     st.stop()
 
 # --- CLASS LABELS ---
@@ -41,10 +41,7 @@ if uploaded_file:
     st.image(image, caption="Uploaded Specimen", width=300)
 
     # 2. Preprocess
-    # Resize to 224x224 (Model Requirement)
     image_resized = ImageOps.fit(image, (224, 224), Image.Resampling.LANCZOS)
-    
-    # Normalize
     img_array = np.array(image_resized) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 
@@ -54,13 +51,13 @@ if uploaded_file:
     label = class_names[idx]
     confidence = np.max(prediction) * 100
 
-    # 4. Show Results
+    # 4. Results
     st.divider()
     st.header(f"Detected: {label}")
     st.progress(int(confidence))
     st.caption(f"AI Confidence: {confidence:.1f}%")
 
-    # 5. Business Logic
+    # 5. Sustainability Logic
     st.subheader("📋 Sustainability Audit")
     c1, c2 = st.columns(2)
     
